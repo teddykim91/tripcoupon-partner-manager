@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>TripCoupon Partner Manager</title><!-- build 20261006-SelectableMasterChanges -->
+<title>TripCoupon Partner Manager</title><!-- build 20261006-TargetedMasterPatch -->
 <style>
 :root{--navy:#0f2747;--blue:#2463eb;--bg:#f4f7fb;--line:#dfe5ee;--muted:#64748b;--green:#16865c;--red:#d33b49;--orange:#d97706}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,Pretendard,"Noto Sans KR",Arial,sans-serif;background:var(--bg);color:#182230}
@@ -182,7 +182,7 @@ applyBtn.addEventListener('click',async()=>{
      let validChecks=pending.checks.filter(x=>master.some(m=>key(m)===x.key)),validPerf=pending.perf.filter(x=>master.some(m=>key(m)===x.key)),selected=new Map();document.querySelectorAll('.master-change-check:checked').forEach(el=>{if(!selected.has(el.dataset.key))selected.set(el.dataset.key,new Set());selected.get(el.dataset.key).add(el.dataset.field)});let monthlyChanges=(pending.masterChanges||[]).map(r=>({...r,changes:r.changes.filter(k=>selected.get(r.key)?.has(k))})).filter(r=>r.changes.length);
      if(API&&validChecks.length)await apiPost({action:'bulkConfirm',items:validChecks});
      if(API&&validPerf.length)await apiPost({action:'upsertPerformance',items:validPerf});
-     if(monthlyChanges.length){let updatedMaster=mergeMonthlyMasterChanges(monthlyChanges),eventDate=new Date().toLocaleString('ko-KR'),events=monthlyChanges.map(r=>({date:eventDate,status:'Changed',region:val(r.new,'region'),partner:val(r.new,'kr'),details:r.changes.map(k=>k+': '+val(r.old,k)+' → '+val(r.new,k)).join(' / '),file:pending.file})),snap={ts:Date.now(),New:0,Discontinued:0,Changed:monthlyChanges.length,keys:{New:[],Discontinued:[],Changed:monthlyChanges.map(x=>x.key)}};if(API)await apiPost({action:'applyImport',master:updatedMaster,events:events,snapshot:snap,file:pending.file});master=updatedMaster;localStorage.setItem(KEY,JSON.stringify(master));localStorage.setItem(SNAP,JSON.stringify(snap))}
+     if(monthlyChanges.length){let updatedMaster=mergeMonthlyMasterChanges(monthlyChanges),eventDate=new Date().toLocaleString('ko-KR'),fieldHeader={'kr':'Partner Name (KR)','en':'Partner Name (EN)','cat':'Category','contact':'Contact Person','phone':'Phone','email':'Email','messenger':'Messenger','benefit':'TripCoupon Benefit'},patchItems=monthlyChanges.flatMap(r=>r.changes.map(k=>({key:r.key,field:fieldHeader[k],value:val(r.new,k)}))),events=monthlyChanges.map(r=>({date:eventDate,status:'Changed',region:val(r.new,'region'),partner:val(r.new,'kr'),details:r.changes.map(k=>k+': '+val(r.old,k)+' → '+val(r.new,k)).join(' / '),file:pending.file})),snap={ts:Date.now(),New:0,Discontinued:0,Changed:monthlyChanges.length,keys:{New:[],Discontinued:[],Changed:monthlyChanges.map(x=>x.key)}};if(API)await apiPost({action:'patchMasterFields',items:patchItems,events:events,snapshot:snap,file:pending.file});master=updatedMaster;localStorage.setItem(KEY,JSON.stringify(master));localStorage.setItem(SNAP,JSON.stringify(snap))}
      if(API)await loadCloud();else{filters();dashboard();partnerRows();renderChecks();renderPerformance();renderHistory()}
      pending=null;applyBtn.classList.add('hidden');alert('Monthly updates applied. Existing partner information changes were updated in MASTER; missing partners were not discontinued.');
    }catch(e){alert('Failed to save monthly updates.\n'+e.message)}
