@@ -37,7 +37,7 @@ main{margin-left:235px;padding:30px;max-width:1600px}.top{display:flex;justify-c
 <section id="history" class="hidden"><div class="top"><div><h2>Change History</h2><div class="sub">이 브라우저에서 적용한 Import 이력</div></div></div><div class="panel" id="historyBox"></div></section>
 </main>
 <script>
-const KEY='tc_partner_master_v1', HIST='tc_partner_history_v1';let master=JSON.parse(localStorage.getItem(KEY)||'null')||window.INITIAL_MASTER||[],pending=null;
+const KEY='tc_partner_master_v1', HIST='tc_partner_history_v1';let master=JSON.parse(localStorage.getItem(KEY)||'null')||window.INITIAL_MASTER||[],pending=null;master=master.filter(x=>String(x['Region']||x['지역']||'').trim()!=='하와이');localStorage.setItem(KEY,JSON.stringify(master));
 const aliases={region:['Region','지역'],kr:['Partner Name (KR)','제휴사명(국문)','제휴사명'],en:['Partner Name (EN)','제휴사명(영문)'],cat:['Category','카테고리'],id:['Partner ID','Affiliate ID','IDX','idx','ID'],contact:['Contact Person','담당자'],phone:['Phone','담당자 번호'],email:['Email','담당자 이메일'],messenger:['Messenger','담당자 메신저'],benefit:['TripCoupon Benefit','제휴혜택(트립쿠폰)'],reg:['Registration Date','최초등록일'],end:['Partnership End Date','제휴종료일']};
 function val(o,k){let x=aliases[k].find(a=>Object.prototype.hasOwnProperty.call(o,a));return x?String(o[x]??'').trim():''}
 const regionNames={'괌':'Guam','사이판':'Saipan','다낭':'Da Nang','부산':'Busan','방콕':'Bangkok','발리':'Bali','나트랑':'Nha Trang','푸꾸옥':'Phu Quoc','호이안':'Hoi An','파리':'Paris','하와이':'Hawaii'};
