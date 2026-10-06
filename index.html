@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>TripCoupon Partner Manager</title><!-- build 20261006-SafeMonthlyImport -->
+<title>TripCoupon Partner Manager</title><!-- build 20261006-FixImportApplyMarkup -->
 <style>
 :root{--navy:#0f2747;--blue:#2463eb;--bg:#f4f7fb;--line:#dfe5ee;--muted:#64748b;--green:#16865c;--red:#d33b49;--orange:#d97706}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,Pretendard,"Noto Sans KR",Arial,sans-serif;background:var(--bg);color:#182230}
@@ -59,7 +59,7 @@ main{margin-left:235px;padding:30px;max-width:1600px}.top{display:flex;justify-c
 <section id="import" class="hidden"><div class="top"><div><h2>Import & Compare</h2><div class="sub">Upload the Excel file downloaded from TripCoupon Admin.</div></div></div>
 <div class="panel"><div class="toolbar"><label><b>Upload Mode</b></label><select id="importMode"><option value="monthly" selected>Monthly Check & Performance</option><option value="master">Partner Data Update</option></select></div><div class="drop"><b>Upload Excel File</b><p class="sub"><b>Monthly Check & Performance</b> updates only verification and monthly usage fields. It never changes, adds, or discontinues MASTER partners. Use <b>Partner Data Update</b> only when you intentionally want to compare TripCoupon Admin partner data.</p><input id="file" type="file" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv"></div>
 <div class="notice"><b>Recommended monthly workflow:</b> keep <b>Monthly Check & Performance</b> selected. The system reads only <b>Check Status / Last Checked / Monthly Usage / Usage Month / Checked By</b>. Existing partner master data such as phone, registration date, benefit, and partnership status will not be modified. Monthly Usage blank = not reported; 0 = confirmed zero usage.</div>
-<div id="compareSummary"</div><div id="compareTable" class="tablewrap"></div><div class="toolbar"><button id="apply" class="primary hidden">Apply Changes</button></div></div></section>
+<div id="compareSummary"></div><div id="compareTable" class="tablewrap"></div><div class="toolbar" style="position:sticky;bottom:0;background:#fff;padding:14px 0;z-index:5"><button id="apply" class="primary hidden" style="min-width:190px">Apply Changes</button></div></div></section>
 
 <section id="history" class="hidden"><div class="top"><div><h2>Change History</h2><div class="sub">Cumulative partner change history</div></div></div><div class="panel"><div class="toolbar"><label class="datefield"><span>From</span><input id="historyFrom" type="date" title="Start date"><button type="button" class="calendarBtn" data-target="historyFrom" title="Open calendar">📅</button></label><span class="sub" style="margin:10px 0 0">~</span><label class="datefield"><span>To</span><input id="historyTo" type="date" title="End date"><button type="button" class="calendarBtn" data-target="historyTo" title="Open calendar">📅</button></label><select id="historyStatus"><option value="">All Status</option><option value="New">New</option><option value="Changed">Changed</option><option value="Discontinued">Discontinued</option></select><button id="historySearch" class="primary">Search</button><button id="historyReset">Reset</button></div><div id="historyBox"></div></div></section>
 </main>
