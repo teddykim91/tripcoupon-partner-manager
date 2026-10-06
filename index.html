@@ -55,9 +55,10 @@ function dashboard(){
  regions.innerHTML=re.length?re.map(([n,v])=>'<div class="barrow"><span>'+esc(regionLabel(n))+'</span><div class="bartrack"><div class="barfill" style="width:'+(v/mx*100)+'%"></div></div><b>'+v+'</b></div>').join(''):'<div class="empty">데이터가 없습니다.</div>';
  let sm={'🟢 Active':0,'🟡 Check Required':0,'🔵 New':0,'🔴 Discontinued':0,'⚫ Closed':0};
  master.forEach(x=>{let end=val(x,'end'),checked=String(x['Last Partnership Check']||'').trim(),saved=String(x['Partnership Status']||'').trim();let s;if(end||x._status==='Discontinued')s='🔴 Discontinued';else if(saved==='⚫ Closed')s='⚫ Closed';else if(checked)s='🟢 Active';else s='🟡 Check Required';sm[s]++;});
- let sv=Object.entries(sm).filter(x=>x[1]>0),total=Math.max(1,sv.reduce((a,x)=>a+x[1],0)),cols=['#22a06b','#e9a23b','#2463eb','#d33b49','#64748b'],p=0,stops=[];
- sv.forEach((x,i)=>{let a=p,b=p+x[1]/total*100;stops.push(cols[i]+' '+a+'% '+b+'%');p=b});
- statusChart.innerHTML='<div class="donutwrap"><div class="donut" style="background:conic-gradient('+stops.join(',')+')"></div><div class="legend">'+sv.map((x,i)=>'<div><span class="dot" style="background:'+cols[i]+'"></span>'+esc(x[0])+' <b>'+x[1]+'</b></div>').join('')+'</div></div>';
+ let statusColors={'🟢 Active':'#22a06b','🟡 Check Required':'#e9a23b','🔵 New':'#2463eb','🔴 Discontinued':'#d33b49','⚫ Closed':'#64748b'};
+ let sv=Object.entries(sm).filter(x=>x[1]>0),total=Math.max(1,sv.reduce((a,x)=>a+x[1],0)),p=0,stops=[];
+ sv.forEach(([name,count])=>{let a=p,b=p+count/total*100;stops.push(statusColors[name]+' '+a+'% '+b+'%');p=b});
+ statusChart.innerHTML='<div class="donutwrap"><div class="donut" style="background:conic-gradient('+stops.join(',')+')"></div><div class="legend">'+sv.map(([name,count])=>'<div><span class="dot" style="background:'+statusColors[name]+'"></span>'+esc(name.replace(/^[^ ]+ /,''))+' <b>'+count+'</b></div>').join('')+'</div></div>';
  let cats=['restaurant','massage','shop','travel'],cc=['#2463eb','#22a06b','#e9a23b','#8b5cf6'];
  categoryChart.innerHTML=re.map(([region])=>{let xs=cats.map(cat=>active.filter(x=>val(x,'region')===region&&val(x,'cat').toLowerCase()===cat).length),t=Math.max(1,xs.reduce((a,b)=>a+b,0));return '<div class="mix"><b>'+esc(regionLabel(region))+'</b><div class="stack">'+xs.map((v,i)=>v?'<div class="seg" title="'+cats[i]+' '+v+'" style="width:'+(v/t*100)+'%;background:'+cc[i]+'"></div>':'').join('')+'</div></div>'}).join('')+'<div class="mixlegend">'+cats.map((x,i)=>'<span style="--c:'+cc[i]+'">'+x+'</span>').join('')+'</div>';
 }
