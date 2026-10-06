@@ -5,8 +5,130 @@ function key_(r,n){return (String(r||'').trim()+'||'+String(n||'').trim()).toLow
 function sheet_(name,headers){const ss=SpreadsheetApp.openById(SPREADSHEET_ID);let sh=ss.getSheetByName(name);if(!sh){sh=ss.insertSheet(name);if(headers){sh.getRange(1,1,1,headers.length).setValues([headers]);sh.setFrozenRows(1)}}return sh}
 function readMaster_(){const sh=sheet_(MASTER),n=sh.getLastRow();if(n<2)return [];const v=sh.getRange(1,1,n,14).getDisplayValues(),head=v.shift();return v.filter(r=>r[1]).map(r=>{let o={};head.forEach((h,i)=>o[h]=r[i]);const ps=String(r[11]||'');o._status=(r[10]||ps.includes('Discontinued'))?'Discontinued':ps.includes('New')?'New':'Existing';return o})}
 function readChecks_(){const sh=sheet_(CHECKS,['Key','Region','Partner Name (KR)','Status','Last Checked','Updated At']),n=sh.getLastRow(),o={};if(n<2)return o;sh.getRange(2,1,n-1,Math.max(8,sh.getLastColumn())).getDisplayValues().forEach(r=>{if(r[0])o[r[0]]={status:r[3],lastChecked:r[4],updatedAt:r[5],checkedBy:r[6]||'',notes:r[7]||''}});return o}
-function readPerformance_(){const sh=sheet_(PERFORMANCE,['Month','Key','Region','Partner Name (KR)','Partner Name (EN)','Usage','Checked By','Checked Date','Notes','Source File','Updated At']),n=sh.getLastRow();if(n<2)return [];const rg=sh.getRange(2,1,n-1,11),raw=rg.getValues(),disp=rg.getDisplayValues();return raw.map((r,i)=>{const d=disp[i],month=r[0] instanceof Date?Utilities.formatDate(r[0],Session.getScriptTimeZone(),'yyyy-MM'):String(d[0]||r[0]||'').slice(0,7),checkedDate=r[7] instanceof Date?Utilities.formatDate(r[7],Session.getScriptTimeZone(),'yyyy-MM-dd'):String(d[7]||r[7]||'');return {month:month,key:String(r[1]||''),region:String(r[2]||''),partner:String(r[3]||''),partnerEn:String(r[4]||''),usage:Number(r[5])||0,checkedBy:String(r[6]||''),checkedDate:checkedDate,notes:String(r[8]||''),sourceFile:String(r[9]||''),updatedAt:String(r[10]||'')}}).filter(r=>r.month&&r.key)}
-function upsertPerformance_(p){if(!Array.isArray(p.items)||!p.items.length)throw new Error('performance items missing');const sh=sheet_(PERFORMANCE,['Month','Key','Region','Partner Name (KR)','Partner Name (EN)','Usage','Checked By','Checked Date','Notes','Source File','Updated At']),n=sh.getLastRow(),existing={};if(n>=2){sh.getRange(2,1,n-1,2).getDisplayValues().forEach((r,i)=>{if(r[0]&&r[1])existing[r[0]+'||'+r[1]]=i+2})}p.items.forEach(item=>{let usage=Number(item.usage);if(!Number.isFinite(usage)||usage<0)throw new Error('Invalid usage for '+(item.partner||item.key));let vals=[item.month||'',item.key||'',item.region||'',item.partner||'',item.partnerEn||'',Math.round(usage),item.checkedBy||'',item.checkedDate||Utilities.formatDate(new Date(),Session.getScriptTimeZone(),'yyyy-MM-dd'),item.notes||'',item.sourceFile||'',item.updatedAt||new Date().toISOString()],k=vals[0]+'||'+vals[1],row=existing[k];if(row)sh.getRange(row,1,1,11).setValues([vals]);else{sh.appendRow(vals);row=sh.getLastRow();existing[k]=row}sh.getRange(row,1).setNumberFormat('yyyy-mm');sh.getRange(row,6).setNumberFormat('0');sh.getRange(row,8).setNumberFormat('yyyy-mm-dd')})}
+function readPerformance_() {
+  var sh = sheet_(PERFORMANCE, [
+    'Month','Key','Region','Partner Name (KR)','Partner Name (EN)',
+    'Usage','Checked By','Checked Date','Notes','Source File','Updated At'
+  ]);
+  var n = sh.getLastRow();
+  if (n < 2) return [];
+
+  var rg = sh.getRange(2, 1, n - 1, 11);
+  var raw = rg.getValues();
+  var disp = rg.getDisplayValues();
+  var result = [];
+
+  for (var i = 0; i < raw.length; i++) {
+    var r = raw[i];
+    var d = disp[i];
+    var month = '';
+    var checkedDate = '';
+
+    if (r[0] instanceof Date) {
+      month = Utilities.formatDate(r[0], Session.getScriptTimeZone(), 'yyyy-MM');
+    } else {
+      month = String(d[0] || r[0] || '').substring(0, 7);
+    }
+
+    if (r[7] instanceof Date) {
+      checkedDate = Utilities.formatDate(r[7], Session.getScriptTimeZone(), 'yyyy-MM-dd');
+    } else {
+      checkedDate = String(d[7] || r[7] || '');
+    }
+
+    var key = String(r[1] || '');
+    if (!month || !key) continue;
+
+    result.push({
+      month: month,
+      key: key,
+      region: String(r[2] || ''),
+      partner: String(r[3] || ''),
+      partnerEn: String(r[4] || ''),
+      usage: Number(r[5]) || 0,
+      checkedBy: String(r[6] || ''),
+      checkedDate: checkedDate,
+      notes: String(r[8] || ''),
+      sourceFile: String(r[9] || ''),
+      updatedAt: String(r[10] || '')
+    });
+  }
+
+  return result;
+}
+
+function upsertPerformance_(p) {
+  if (!p || !Array.isArray(p.items) || p.items.length === 0) {
+    throw new Error('performance items missing');
+  }
+
+  var headers = [
+    'Month','Key','Region','Partner Name (KR)','Partner Name (EN)',
+    'Usage','Checked By','Checked Date','Notes','Source File','Updated At'
+  ];
+  var sh = sheet_(PERFORMANCE, headers);
+  var n = sh.getLastRow();
+  var existing = {};
+
+  if (n >= 2) {
+    var current = sh.getRange(2, 1, n - 1, 2).getDisplayValues();
+    for (var i = 0; i < current.length; i++) {
+      if (current[i][0] && current[i][1]) {
+        existing[current[i][0] + '||' + current[i][1]] = i + 2;
+      }
+    }
+  }
+
+  for (var j = 0; j < p.items.length; j++) {
+    var item = p.items[j];
+    var usage = Number(item.usage);
+
+    if (!isFinite(usage) || usage < 0) {
+      throw new Error('Invalid usage for ' + (item.partner || item.key || 'unknown partner'));
+    }
+
+    var month = String(item.month || '');
+    var partnerKey = String(item.key || '');
+    if (!month || !partnerKey) {
+      throw new Error('Month or partner key missing');
+    }
+
+    var checkedDate = item.checkedDate ||
+      Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+
+    var updatedAt = item.updatedAt || new Date().toISOString();
+
+    var vals = [
+      month,
+      partnerKey,
+      item.region || '',
+      item.partner || '',
+      item.partnerEn || '',
+      Math.round(usage),
+      item.checkedBy || '',
+      checkedDate,
+      item.notes || '',
+      item.sourceFile || '',
+      updatedAt
+    ];
+
+    var compositeKey = month + '||' + partnerKey;
+    var row = existing[compositeKey];
+
+    if (row) {
+      sh.getRange(row, 1, 1, 11).setValues([vals]);
+    } else {
+      sh.appendRow(vals);
+      row = sh.getLastRow();
+      existing[compositeKey] = row;
+    }
+
+    sh.getRange(row, 1).setNumberFormat('@');
+    sh.getRange(row, 6).setNumberFormat('0');
+    sh.getRange(row, 8).setNumberFormat('@');
+  }
+}
+
 function readHistory_(){const sh=sheet_(HISTORY,['Date','Status','Region','Partner','Details','File']),n=sh.getLastRow();if(n<2)return [];return sh.getRange(2,1,n-1,6).getDisplayValues().reverse().map(r=>({date:r[0],status:r[1],region:r[2],partner:r[3],details:r[4],file:r[5]}))}
 function doGet(e){try{if(((e&&e.parameter&&e.parameter.action)||'bootstrap')==='bootstrap'){let snapshot=null;try{snapshot=JSON.parse(PropertiesService.getScriptProperties().getProperty('LAST_IMPORT_SNAPSHOT')||'null')}catch(_e){}return out_({ok:true,master:readMaster_(),checks:readChecks_(),history:readHistory_(),performance:readPerformance_(),snapshot:snapshot})};return out_({ok:false,error:'Unknown action'})}catch(err){return out_({ok:false,error:String(err)})}}
 function doPost(e){const lock=LockService.getScriptLock();lock.waitLock(30000);try{const p=JSON.parse((e&&e.postData&&e.postData.contents)||'{}');if(p.action==='setCheck'){setCheck_(p);return out_({ok:true})}if(p.action==='bulkConfirm'){bulkConfirm_(p);return out_({ok:true})}if(p.action==='applyImport'){applyImport_(p);return out_({ok:true})}if(p.action==='upsertPerformance'){upsertPerformance_(p);return out_({ok:true})}return out_({ok:false,error:'Unknown action'})}catch(err){return out_({ok:false,error:String(err)})}finally{lock.releaseLock()}}
