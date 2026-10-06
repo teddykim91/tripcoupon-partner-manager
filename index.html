@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>TripCoupon Partner Manager</title><!-- build 20261006-OfficialTripCouponLogo -->
+<title>TripCoupon Partner Manager</title><!-- build 20261006-ImportHeaderFix -->
 <style>
 :root{--navy:#0f2747;--blue:#2463eb;--bg:#f4f7fb;--line:#dfe5ee;--muted:#64748b;--green:#16865c;--red:#d33b49;--orange:#d97706}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,Pretendard,"Noto Sans KR",Arial,sans-serif;background:var(--bg);color:#182230}
@@ -49,7 +49,24 @@ async function apiGet(action){if(!API)return null;let r=await fetch(API+'?action
 async function apiPost(body){if(!API)return null;let r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});if(!r.ok)throw new Error('Cloud sync write failed');let j=await r.json();if(!j.ok)throw new Error(j.error||'Cloud sync write failed');return j}
 async function loadCloud(){if(!API)return;try{let j=await apiGet('bootstrap');if(j.master&&j.master.length){master=j.master;localStorage.setItem(KEY,JSON.stringify(master))}if(j.checks)localStorage.setItem(CHECK,JSON.stringify(j.checks));if(j.history)localStorage.setItem(EVENT,JSON.stringify(j.history));filters();dashboard();partnerRows();renderChecks();renderHistory()}catch(e){console.warn(e)}}
 let master=JSON.parse(localStorage.getItem(KEY)||'null')||window.INITIAL_MASTER||[],pending=null;master=master.filter(x=>{const region=String(x['Region']||x['Region']||'').trim();const name=String(x['Partner Name (KR)']||x['Partner명(국문)']||x['Partner명']||'').trim();return region!=='하와이'&&!(region==='파리'&&name==='까레 오페라 약국');});localStorage.setItem(KEY,JSON.stringify(master));const REPAIR='tc_status_repair_20261006_v1';if(!localStorage.getItem(REPAIR)){master=master.map(x=>x._status==='Changed'?{...x,_status:'Existing'}:x);localStorage.setItem(KEY,JSON.stringify(master));localStorage.setItem(REPAIR,'1');}const STATUS_INIT='tc_existing_status_20261006_v1';if(!localStorage.getItem(STATUS_INIT)){master=master.map(x=>({...x,_status:x._status||'Existing'}));localStorage.setItem(KEY,JSON.stringify(master));localStorage.setItem(STATUS_INIT,'1');}
-const aliases={region:['Region','Region'],kr:['Partner Name (KR)','Partner명(국문)','Partner명'],en:['Partner Name (EN)','Partner명(영문)'],cat:['Category','카테고리'],id:['Partner ID','Affiliate ID','IDX','idx','ID'],contact:['Contact Person','담당자'],phone:['Phone','담당자 번호'],email:['Email','담당자 이메일'],messenger:['Messenger','담당자 메신저'],benefit:['TripCoupon Benefit','제휴Benefit(트립쿠폰)'],reg:['Registration Date','최초등록일'],end:['Partnership End Date','제휴Discontinued일'],checkStatus:['Check Status','확인Status'],checkDate:['Last Checked','확인날짜'],checkedBy:['Checked By','Checked By'],checkNotes:['Check Notes','확인Notes']};
+const aliases={
+region:['Region','지역'],
+kr:['Partner Name (KR)','제휴사명(국문)','제휴사명'],
+en:['Partner Name (EN)','제휴사명(영문)'],
+cat:['Category','카테고리'],
+id:['Partner ID','Affiliate ID','IDX','idx','ID'],
+contact:['Contact Person','담당자'],
+phone:['Phone','담당자 번호'],
+email:['Email','담당자 이메일'],
+messenger:['Messenger','담당자 메신저'],
+benefit:['TripCoupon Benefit','제휴혜택(트립쿠폰)'],
+reg:['Registration Date','최초등록일'],
+end:['Partnership End Date','제휴종료일'],
+checkStatus:['Check Status','확인상태'],
+checkDate:['Last Checked','확인날짜'],
+checkedBy:['Checked By','확인자'],
+checkNotes:['Check Notes','확인메모']
+}
 function val(o,k){let x=aliases[k].find(a=>Object.prototype.hasOwnProperty.call(o,a));return x?String(o[x]??'').trim():''}
 const regionNames={'괌':'Guam','사이판':'Saipan','다낭':'Da Nang','부산':'Busan','방콕':'Bangkok','발리':'Bali','나트랑':'Nha Trang','푸꾸옥':'Phu Quoc','호이안':'Hoi An','파리':'Paris','하와이':'Hawaii'};
 function regionLabel(v){v=String(v||'').trim();return regionNames[v]||v||'Unknown'}
