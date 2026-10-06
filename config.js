@@ -1,3 +1,2 @@
 // Google Apps Script Web App endpoint.
-// After deployment, paste the /exec URL here.
-window.TC_API_URL='';
+window.TC_API_URL='https://script.google.com/macros/s/AKfycbz43s8anKUMHSrz52UFxRC-s5-aVVTV3QJxbfIlF3REjS8a633mOKJ93RaKWuG_vVuu/exec';
