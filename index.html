@@ -40,7 +40,7 @@ main{margin-left:235px;padding:30px;max-width:1600px}.top{display:flex;justify-c
 const KEY='tc_partner_master_v1', HIST='tc_partner_history_v1';let master=JSON.parse(localStorage.getItem(KEY)||'null')||window.INITIAL_MASTER||[],pending=null;
 const aliases={region:['Region','지역'],kr:['Partner Name (KR)','제휴사명(국문)','제휴사명'],en:['Partner Name (EN)','제휴사명(영문)'],cat:['Category','카테고리'],id:['Partner ID','Affiliate ID','IDX','idx','ID'],contact:['Contact Person','담당자'],phone:['Phone','담당자 번호'],email:['Email','담당자 이메일'],messenger:['Messenger','담당자 메신저'],benefit:['TripCoupon Benefit','제휴혜택(트립쿠폰)'],reg:['Registration Date','최초등록일'],end:['Partnership End Date','제휴종료일']};
 function val(o,k){let x=aliases[k].find(a=>Object.prototype.hasOwnProperty.call(o,a));return x?String(o[x]??'').trim():''}
-const regionNames={'괌':'Guam','사이판':'Saipan','다낭':'Da Nang','부산':'Busan','방콕':'Bangkok','발리':'Bali','나트랑':'Nha Trang','푸꾸옥':'Phu Quoc'};
+const regionNames={'괌':'Guam','사이판':'Saipan','다낭':'Da Nang','부산':'Busan','방콕':'Bangkok','발리':'Bali','나트랑':'Nha Trang','푸꾸옥':'Phu Quoc','호이안':'Hoi An','파리':'Paris','하와이':'Hawaii'};
 function regionLabel(v){v=String(v||'').trim();return regionNames[v]||v||'Unknown'}
 function key(o){return val(o,'id')||[val(o,'region'),val(o,'kr')].join('||').toLowerCase()}
 function parseCSV(t){let rows=[],row=[],v='',q=false;for(let i=0;i<t.length;i++){let c=t[i],n=t[i+1];if(c=='"'&&q&&n=='"'){v+='"';i++}else if(c=='"')q=!q;else if(c==','&&!q){row.push(v);v=''}else if((c=='\n'||c=='\r')&&!q){if(c=='\r'&&n=='\n')i++;row.push(v);if(row.some(x=>x!==''))rows.push(row);row=[];v=''}else v+=c}row.push(v);if(row.some(x=>x!==''))rows.push(row);let h=rows.shift()||[];h[0]=(h[0]||'').replace(/^\uFEFF/,'');return rows.map(r=>Object.fromEntries(h.map((x,i)=>[x.trim(),r[i]??''])))}
@@ -54,7 +54,7 @@ function dashboard(){
  let re=Object.entries(r).sort((a,b)=>b[1]-a[1]),mx=Math.max(1,...re.map(x=>x[1]));
  regions.innerHTML=re.length?re.map(([n,v])=>'<div class="barrow"><span>'+esc(regionLabel(n))+'</span><div class="bartrack"><div class="barfill" style="width:'+(v/mx*100)+'%"></div></div><b>'+v+'</b></div>').join(''):'<div class="empty">데이터가 없습니다.</div>';
  let sm={'🟢 Active':0,'🟡 Check Required':0,'🔵 New':0,'🔴 Discontinued':0,'⚫ Closed':0};
- master.forEach(x=>{let s=String(x['Partnership Status']||''); if(s in sm)sm[s]++; else if(x._status==='Discontinued')sm['🔴 Discontinued']++; else if(x._status==='New')sm['🔵 New']++;});
+ master.forEach(x=>{let end=val(x,'end'),checked=String(x['Last Partnership Check']||'').trim(),saved=String(x['Partnership Status']||'').trim();let s;if(end||x._status==='Discontinued')s='🔴 Discontinued';else if(saved==='⚫ Closed')s='⚫ Closed';else if(checked)s='🟢 Active';else s='🟡 Check Required';sm[s]++;});
  let sv=Object.entries(sm).filter(x=>x[1]>0),total=Math.max(1,sv.reduce((a,x)=>a+x[1],0)),cols=['#22a06b','#e9a23b','#2463eb','#d33b49','#64748b'],p=0,stops=[];
  sv.forEach((x,i)=>{let a=p,b=p+x[1]/total*100;stops.push(cols[i]+' '+a+'% '+b+'%');p=b});
  statusChart.innerHTML='<div class="donutwrap"><div class="donut" style="background:conic-gradient('+stops.join(',')+')"></div><div class="legend">'+sv.map((x,i)=>'<div><span class="dot" style="background:'+cols[i]+'"></span>'+esc(x[0])+' <b>'+x[1]+'</b></div>').join('')+'</div></div>';
