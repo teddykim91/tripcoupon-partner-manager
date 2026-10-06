@@ -12,7 +12,7 @@ main{margin-left:235px;padding:30px;max-width:1600px}.top{display:flex;justify-c
 .cards{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 1px 2px #00000008}.card{padding:18px}.card b{font-size:27px;display:block;margin-top:7px}.label{font-size:12px;color:var(--muted);font-weight:700}.panel{margin-top:18px;padding:18px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}input,select,button{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff}button{cursor:pointer;font-weight:700}.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.danger{color:var(--red)}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:11px 10px;border-bottom:1px solid #edf0f5;white-space:nowrap}th{color:#536174;font-size:11px;text-transform:uppercase}.tablewrap{overflow:auto;max-height:590px}.badge{padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800}.Existing{background:#e9f7f1;color:var(--green)}.New{background:#e8f0ff;color:#2456c5}.Discontinued{background:#fdecee;color:var(--red)}.Changed{background:#fff3df;color:var(--orange)}.empty{padding:55px;text-align:center;color:var(--muted)}.drop{border:2px dashed #cbd5e1;border-radius:12px;padding:38px;text-align:center}.hidden{display:none!important}.notice{background:#fff8e8;border:1px solid #f3d58b;padding:11px;border-radius:8px;font-size:12px;margin-top:12px}
 @media(max-width:900px){aside{position:static;width:auto}main{margin:0}.cards{grid-template-columns:1fr 1fr}}
 </style>
-</head>
+<script src="master-data.js"></script></head>
 <body>
 <aside><h1>TripCoupon<br>Partner Manager</h1>
 <div class="nav active" data-page="dashboard">Dashboard</div><div class="nav" data-page="partners">Partners</div><div class="nav" data-page="import">Import & Compare</div><div class="nav" data-page="history">Change History</div>
@@ -33,7 +33,7 @@ main{margin-left:235px;padding:30px;max-width:1600px}.top{display:flex;justify-c
 <section id="history" class="hidden"><div class="top"><div><h2>Change History</h2><div class="sub">이 브라우저에서 적용한 Import 이력</div></div></div><div class="panel" id="historyBox"></div></section>
 </main>
 <script>
-const KEY='tc_partner_master_v1', HIST='tc_partner_history_v1';let master=JSON.parse(localStorage.getItem(KEY)||'[]'),pending=null;
+const KEY='tc_partner_master_v1', HIST='tc_partner_history_v1';let master=JSON.parse(localStorage.getItem(KEY)||'null')||window.INITIAL_MASTER||[],pending=null;
 const aliases={region:['Region','지역'],kr:['Partner Name (KR)','제휴사명(국문)','제휴사명'],en:['Partner Name (EN)','제휴사명(영문)'],cat:['Category','카테고리'],id:['Partner ID','Affiliate ID','IDX','idx','ID'],contact:['Contact Person','담당자'],phone:['Phone','담당자 번호'],email:['Email','담당자 이메일'],messenger:['Messenger','담당자 메신저'],benefit:['TripCoupon Benefit','제휴혜택(트립쿠폰)'],reg:['Registration Date','최초등록일'],end:['Partnership End Date','제휴종료일']};
 function val(o,k){let x=aliases[k].find(a=>Object.prototype.hasOwnProperty.call(o,a));return x?String(o[x]??'').trim():''}
 function key(o){return val(o,'id')||[val(o,'region'),val(o,'kr')].join('||').toLowerCase()}
