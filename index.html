@@ -111,7 +111,7 @@ function dashboard(){
  let allPartners=master,snap=JSON.parse(localStorage.getItem(SNAP)||'null'),fresh=snap&&Date.now()-snap.ts<WEEK,sNew=fresh?(snap.New||0):0,sDisc=fresh?(snap.Discontinued||0):0,sChanged=fresh?(snap.Changed||0):0;
  if(snap&&!fresh)localStorage.removeItem(SNAP);
  // Dashboard activity window: New / Discontinued / Changed remain recent for 7 days. After 7 days they roll into Existing automatically.
- let existing=Math.max(0,allPartners.length-sNew-sDisc-sChanged);
+ let endedCurrent=allPartners.filter(x=>['Discontinued','Closed'].includes(derivedCheck(x))).length,existing=Math.max(0,allPartners.length-endedCurrent);
  kTotal.textContent=existing;kExisting.textContent=existing;kNew.textContent=sNew;kDisc.textContent=sDisc;kChanged.textContent=sChanged;
  let r={};allPartners.forEach(x=>r[val(x,'region')||'Unknown']=(r[val(x,'region')||'Unknown']||0)+1);
  let re=Object.entries(r).sort((a,b)=>b[1]-a[1]),mx=Math.max(1,...re.map(x=>x[1]));
