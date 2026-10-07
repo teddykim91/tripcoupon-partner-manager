@@ -110,8 +110,9 @@ function counts(data){return data.reduce((a,x)=>(a[x.status]=(a[x.status]||0)+1,
 function dashboard(){
  let allPartners=master,snap=JSON.parse(localStorage.getItem(SNAP)||'null'),fresh=snap&&Date.now()-snap.ts<WEEK,sNew=fresh?(snap.New||0):0,sDisc=fresh?(snap.Discontinued||0):0,sChanged=fresh?(snap.Changed||0):0;
  if(snap&&!fresh)localStorage.removeItem(SNAP);
- // TOTAL always means every row in MASTER, matching Partnership Check.
- kTotal.textContent=allPartners.length;kExisting.textContent=Math.max(0,allPartners.length-sNew-sDisc-sChanged);kNew.textContent=sNew;kDisc.textContent=sDisc;kChanged.textContent=sChanged;
+ // Dashboard activity window: New / Discontinued / Changed remain recent for 7 days. After 7 days they roll into Existing automatically.
+ let existing=Math.max(0,allPartners.length-sNew-sDisc-sChanged);
+ kTotal.textContent=existing;kExisting.textContent=existing;kNew.textContent=sNew;kDisc.textContent=sDisc;kChanged.textContent=sChanged;
  let r={};allPartners.forEach(x=>r[val(x,'region')||'Unknown']=(r[val(x,'region')||'Unknown']||0)+1);
  let re=Object.entries(r).sort((a,b)=>b[1]-a[1]),mx=Math.max(1,...re.map(x=>x[1]));
  regions.innerHTML=re.length?re.map(([n,v])=>'<div class="barrow"><span>'+esc(regionLabel(n))+'</span><div class="bartrack"><div class="barfill" style="width:'+(v/mx*100)+'%"></div></div><b>'+v+'</b></div>').join(''):'<div class="empty">No data available.</div>';
